@@ -15,7 +15,7 @@ var poem = [
 	"especially yours can heal a frozen heart",
 ];
 
-var difficulty = 10;
+var difficulty = 8;
 
 var Blockchain = {
 	blocks: [],
@@ -46,19 +46,45 @@ function createBlock(data) {
 		prevHash: Blockchain.blocks[Blockchain.blocks.length-1].hash,
 		data,
 		timestamp: Date.now(),
+		nonce: 0,
 	};
 
 	bl.hash = blockHash(bl);
-
+	console.log(bl)
 	return bl;
 }
 
 function blockHash(bl) {
-	// TODO
+	 // take  block as input
+	 // apply sha256 to the block, including nonce (start as 0)
+	 // run hash through hashIsLowEnough
+	 // return the hashed, output (encoded in hexadecimal format?)
+	 // NOTE* added nonce element above.
+	 let hash = crypto.createHash("sha256").update (
+		 JSON.stringify(bl)
+	 ).digest("hex");
+		console.log(hash)
+	while (hashIsLowEnough(hash) != true){
+		bl.nonce++;
+		hash = crypto.createHash("sha256").update (JSON.stringify(bl)).digest("hex");
+
+	};
+	 return hash;
 }
 
 function hashIsLowEnough(hash) {
 	// TODO
+	let numChars = Math.ceil(difficulty / 4)
+	let hashCheck = '0'
+	hashCheck = hashCheck.padStart(numChars, '0')
+	if ( hash.substr(0, numChars -1) != hashCheck) {
+/* 		console.log(hash);
+		console.log(numChars);
+		console.log(`hash check is ${hashCheck}`);	 */
+		return false
+	};
+	
+	return true
 }
 
 function verifyBlock(bl) {

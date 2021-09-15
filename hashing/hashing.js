@@ -71,7 +71,7 @@ console.log(Blockchain);
 console.log(`Blockchain is valid: ${verifyChain(Blockchain)}`);
 
 
-// **********************************
+// ********************************** // 
 
 function blockHash(block) {
 	return crypto.createHash("sha256").update(

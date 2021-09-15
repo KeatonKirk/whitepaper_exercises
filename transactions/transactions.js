@@ -41,12 +41,17 @@ addPoem()
 
 // **********************************
 
+
+
 async function addPoem() {
 	var transactions = [];
 
 	// TODO: add poem lines as authorized transactions
-	// for (let line of poem) {
-	// }
+	 for (let line of poem) {
+		let tr = createTransaction(line);
+		await authorizeTransaction(tr);
+		transactions.push(tr);
+	 }
 
 	var bl = createBlock(transactions);
 
@@ -54,6 +59,7 @@ async function addPoem() {
 
 	return Blockchain;
 }
+
 
 async function checkPoem(chain) {
 	console.log(await verifyChain(chain));
@@ -70,6 +76,19 @@ function createBlock(data) {
 	bl.hash = blockHash(bl);
 
 	return bl;
+}
+
+function createTransaction(line) {
+	let tr = {
+		data: line,
+	};
+	tr.hash = transactionHash(tr);
+	return tr;
+};
+
+async function authorizeTransaction(tr) {
+	tr.pubKey = PUB_KEY_TEXT;
+	tr.signature = await createSignature(tr.hash, PRIV_KEY_TEXT);
 }
 
 function transactionHash(tr) {
@@ -111,6 +130,16 @@ function blockHash(bl) {
 	).digest("hex");
 }
 
+function verifyTransaction(tr) {
+	//make sure hash matches what's computed with transactionHash
+	//make sure pubKey and signature are populate with strings
+	//signature element should verify with verifySignature
+	if (tr.hash != transactionHash(tr)) return false;
+	if (!tr.pubKey || !tr.signature || typeof tr.pubKey != 'string' || typeof tr.signature != 'string') return false
+	if (!verifySignature(tr.signature, tr.pubKey)) return false;
+	return true;
+}
+
 async function verifyBlock(bl) {
 	if (bl.data == null) return false;
 	if (bl.index === 0) {
@@ -129,6 +158,9 @@ async function verifyBlock(bl) {
 		if (!Array.isArray(bl.data)) return false;
 
 		// TODO: verify transactions in block
+		for (let tr of bl.data) {
+			if (!verifyTransaction(tr)) return false;
+		}
 	}
 
 	return true;
@@ -144,3 +176,4 @@ async function verifyChain(chain) {
 
 	return true;
 }
+
